@@ -17,8 +17,12 @@
 # Copyrighted by Chris Plaisier  12/4/2009                      #
 #################################################################
 
-from copy import deepcopy
 from math import log
+
+# Libraries for plotting
+#import numpy, corebio                     # http://numpy.scipy.org and http://code.google.com/p/corebio/
+#from numpy import array, float64, log10   # http://numpy.scipy.org
+#from weblogolib import *                  # http://code.google.com/p/weblogo/
 
 # A class designed to hold a position specific scoring matrix
 # and be able to output this in many different formats
@@ -43,9 +47,12 @@ from math import log
 #
 class pssm:
     # Initialize the pssm
-    def __init__(self, pssmFileName=None, biclusterName=None, nsites=None, eValue=None, pssm=None, genes=None):
+    def __init__(self, pssmFileName=None, biclusterName=None, nsites=None, eValue=None, pssm=None, genes=None, de_novo_method='meme'):
+        self.de_novo_method = de_novo_method
+        self.matches = [] # each entry should be a dictionary of {'factor':<factor_name>,'confidence':<confidence_value>}
+        self.permutedPValue = None
         if not pssmFileName==None:
-            self.name = str(biclusterName)+'_'+(((pssmFileName.split('.'))[0]).split('/'))[-1]
+            self.name = str(biclusterName)+'_'+(((pssmFileName.split('.'))[0]).split('/'))[-1]+'_'+de_novo_method
             self.readPssm(pssmFileName)
         else:
             self.name = biclusterName
@@ -69,19 +76,27 @@ class pssm:
 
     # Returns the name of the PSSM
     def getName(self):
-        return deepcopy(self.name)
+        return self.name
 
     # Sets the name of the PSSM
     def setName(self,name):
         self.name = name
 
+    # Returns the name of the PSSM
+    def getMethod(self):
+        return self.de_novo_method
+    
+    # Returns the name of the PSSM
+    def setMethod(self, de_novo_method):
+        self.de_novo_method = de_novo_method
+
     # Returns the E-value of the PSSM
     def getEValue(self):
-        return deepcopy(self.eValue)
+        return self.eValue
 
     # Returns the number of sites for the PSSM
     def getNSites(self):
-        return deepcopy(self.nsites)
+        return self.nsites
 
     # Returns the number of genes of the PSSM
     def getNumGenes(self):
@@ -89,7 +104,7 @@ class pssm:
 
     # Returns the genes of the PSSM
     def getGenes(self):
-        return deepcopy(self.genes)
+        return self.genes
 
     # Returns the matrix
     def getMatrix(self):
@@ -119,7 +134,13 @@ class pssm:
     def getMemeFormatted(self,atFreq=0.25,cgFreq=0.25):
         memeFormatted = 'MOTIF '+self.name+'\n'
         memeFormatted += 'BL   MOTIF '+self.name+' width=0 seqs=0\n'
-        memeFormatted += 'letter-probability matrix: alength= 4 w= '+str(len(self.matrix))+' nsites= '+self.nsites+' E= '+self.eValue
+        if self.de_novo_method=='meme':
+            nsites = self.nsites
+            eValue = self.eValue
+        elif self.de_novo_method=='weeder':
+            nsites = len(self.nsites)
+            eValue = 0.05
+        memeFormatted += 'letter-probability matrix: alength= 4 w= '+str(len(self.matrix))+' nsites= '+str(nsites)+' E= '+str(eValue)
         for i in self.matrix:
             memeFormatted += '\n '+self.padMe(str(round(float(i[0]),6)))+'  '+self.padMe(str(round(float(i[1]),6)))+'  '+self.padMe(str(round(float(i[2]),6)))+'  '+self.padMe(str(round(float(i[3]),6)))
         return memeFormatted
@@ -168,4 +189,38 @@ class pssm:
                 conLet = 'N'
         return conLet
 
-    
+    # Plot a PSSM using weblogo
+    def plot(self, fileName):
+        dist = numpy.array( self.getMatrix(), numpy.float64 ) 
+        data = LogoData.from_counts(corebio.seq.unambiguous_dna_alphabet, dist*100)
+        options = LogoOptions()
+        options.color_scheme = colorscheme.nucleotide
+        format = LogoFormat(data, options)
+        fout = open(fileName, 'w')
+        png_formatter(data, format, fout)
+        fout.close()
+
+    # Add a match to a pssm
+    def addMatch(self, factor, confidence):
+        if not hasattr(self,'matches'):
+            self.matches = []
+        self.matches.append({'factor':factor, 'confidence':confidence})
+
+    # Add a match to a pssm
+    def getMatches(self):
+        if hasattr(self, 'matches') and not self.matches==[]:
+            return self.matches
+        else:
+            return None
+
+    # Add a match to a pssm
+    def setPermutedPValue(self, permutedPValue):
+        self.permutedPValue = permutedPValue
+
+    # Add a match to a pssm
+    def getPermutedPValue(self):
+        if hasattr(self,'permutedPValue'):
+            return self.permutedPValue
+        else:
+            return None
+
