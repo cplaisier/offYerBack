@@ -335,7 +335,7 @@ class miRvestigator:
     
     # Get the miRNAs to compare against
     def setMiRNAs(self,seedStart,seedEnd, minor=True, p5=True, p3=True):
-        if not os.path.exists('mature.fa.gz'):
+        if not os.path.exists('miRNA/mature.fa.gz'):
             print '\nDownloading miRNA seeds from miRBase.org...'
             # Grab down the latest miRNA data from mirbase.org:
             #  ftp://mirbase.org/pub/mirbase/CURRENT/mature.fa.gz
@@ -345,7 +345,7 @@ class miRvestigator:
             ftp1.cwd('/pub/mirbase/CURRENT/')
             # Get the miRBase.org version number for reference.
             self.miRNAver = (ftp1.pwd().split('/'))[-1]
-            outFile = open('mature.fa.gz','wb')
+            outFile = open('miRNA/mature.fa.gz','wb')
             ftp1.retrbinary('RETR mature.fa.gz',outFile.write)
             outFile.close()
             ftp1.quit()
@@ -356,7 +356,7 @@ class miRvestigator:
         # Read in miRNAs: miRNAs are labeled by the hsa-* names and grabbing 2-8bp
         ### Could merge these as they come in so that don't do redundant, and also so that the labels are together
         import gzip
-        miRNAFile = gzip.open('mature.fa.gz','r')
+        miRNAFile = gzip.open('miRNA/mature.fa.gz','r')
         miRNAs = {}
         while 1:
             miRNALine = miRNAFile.readline()

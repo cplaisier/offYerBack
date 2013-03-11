@@ -32,7 +32,7 @@ residual.norm <- function( rats, maxRowVar ) {
 }
 
 # Read in genes for each cluster
-d1 = read.csv('../cluster.members.genes.txt',header=F)
+d1 = read.csv('../output/cluster.members.genes.txt',header=F)
 biclustMembership = list()
 allGenes = c()
 for(j in 1:length(d1[,1])) {

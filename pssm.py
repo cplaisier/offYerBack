@@ -133,14 +133,14 @@ class pssm:
     # Returns a meme 3 formatted string (letter-probability matrix)
     def getMemeFormatted(self,atFreq=0.25,cgFreq=0.25):
         memeFormatted = 'MOTIF '+self.name+'\n'
-        memeFormatted += 'BL   MOTIF '+self.name+' width=0 seqs=0\n'
         if self.de_novo_method=='meme':
             nsites = self.nsites
             eValue = self.eValue
         elif self.de_novo_method=='weeder':
             nsites = len(self.nsites)
             eValue = 0.05
-        memeFormatted += 'letter-probability matrix: alength= 4 w= '+str(len(self.matrix))+' nsites= '+str(nsites)+' E= '+str(eValue)
+        memeFormatted += 'BL   MOTIF '+self.name+' width=0 seqs='+str(int(nsites)+1)+'\n'
+        memeFormatted += 'letter-probability matrix: alength= 4 w= '+str(len(self.matrix))+' nsites= '+str(int(nsites)+1)+' E= '+str(eValue)
         for i in self.matrix:
             memeFormatted += '\n '+self.padMe(str(round(float(i[0]),6)))+'  '+self.padMe(str(round(float(i[1]),6)))+'  '+self.padMe(str(round(float(i[2]),6)))+'  '+self.padMe(str(round(float(i[3]),6)))
         return memeFormatted

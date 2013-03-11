@@ -3,7 +3,7 @@ library(topGO)
 library('org.Hs.eg.db')
 
 # Automated for all clusters
-d1 = read.csv('../cluster.members.genes.txt',header=F)
+d1 = read.csv('../output/cluster.members.genes.txt',header=F)
 biclustMembership = list()
 for(j in 1:length(d1[,1])) {
     biclustMembership[[j]] = strsplit(as.character(d1[j,]),split=' ')[[1]][-1]
